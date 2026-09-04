@@ -36,24 +36,25 @@ class EnergyCell:
     def offscreen(self) -> bool:
         return self.x < -40
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, ox: float = 0.0, oy: float = 0.0) -> None:
+        x, y = self.x + ox, self.y + oy
         pulse = 0.6 + 0.4 * math.sin(self.t * 6.0 + self.phase)
         # Halo.
         halo_r = int(self.RADIUS + 8 + 4 * pulse)
         halo = pygame.Surface((halo_r * 2, halo_r * 2), pygame.SRCALPHA)
         pygame.draw.circle(halo, (*config.NEON_YELLOW, 60), (halo_r, halo_r), halo_r)
         pygame.draw.circle(halo, (*config.NEON_YELLOW, 110), (halo_r, halo_r), int(self.RADIUS + 3))
-        surface.blit(halo, (self.x - halo_r, self.y - halo_r))
+        surface.blit(halo, (x - halo_r, y - halo_r))
         # Rotating diamond core.
         w = self.RADIUS * (0.55 + 0.45 * abs(math.sin(self.t * 3.0 + self.phase)))
         pts = [
-            (self.x, self.y - self.RADIUS),
-            (self.x + w, self.y),
-            (self.x, self.y + self.RADIUS),
-            (self.x - w, self.y),
+            (x, y - self.RADIUS),
+            (x + w, y),
+            (x, y + self.RADIUS),
+            (x - w, y),
         ]
         pygame.draw.polygon(surface, (80, 60, 8), pts)
         pygame.draw.polygon(surface, config.NEON_YELLOW, pts, 2)
-        pygame.draw.circle(surface, config.WHITE, (int(self.x), int(self.y)), 3)
-        neon.v_line(surface, self.x, self.y - self.RADIUS - 4, self.y - self.RADIUS - 10,
+        pygame.draw.circle(surface, config.WHITE, (int(x), int(y)), 3)
+        neon.v_line(surface, x, y - self.RADIUS - 4, y - self.RADIUS - 10,
                     config.NEON_YELLOW, 1, alpha=120)

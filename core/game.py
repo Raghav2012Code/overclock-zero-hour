@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import random
 
@@ -13,6 +14,7 @@ from core.collision import collides
 from core.spawner import Spawner
 from core.state import GameState
 from entities.particles import ParticleSystem
+from entities.pickups import EnergyCell
 from entities.player import Player
 from graphics.background import ParallaxBackground
 from graphics.sprites import build_sprites
@@ -21,14 +23,16 @@ from ui.screens import Screens
 
 HI_SCORE_FILE = "overclock_hiscore.txt"
 
+logger = logging.getLogger(__name__)
+
 
 def load_hi_score() -> int:
     try:
         if os.path.exists(HI_SCORE_FILE):
             with open(HI_SCORE_FILE, "r", encoding="utf-8") as fh:
                 return max(0, int(fh.read().strip() or "0"))
-    except (OSError, ValueError):
-        pass
+    except (OSError, ValueError) as exc:
+        logger.debug("could not load hi-score: %s", exc)
     return 0
 
 
@@ -36,8 +40,8 @@ def save_hi_score(value: int) -> None:
     try:
         with open(HI_SCORE_FILE, "w", encoding="utf-8") as fh:
             fh.write(str(int(value)))
-    except OSError:
-        pass
+    except OSError as exc:
+        logger.debug("could not save hi-score: %s", exc)
 
 
 class Game:
@@ -113,9 +117,6 @@ class Game:
     def _is_jump_key(self, key: int) -> bool:
         return key in (pygame.K_SPACE, pygame.K_UP, pygame.K_w)
 
-    def _is_slide_key(self, key: int) -> bool:
-        return key in (pygame.K_DOWN, pygame.K_s)
-
     def handle_event(self, event: pygame.event.Event) -> bool:
         """Return False to quit the application."""
         if event.type == pygame.QUIT:
@@ -123,11 +124,15 @@ class Game:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return False
+            # NOTE: pygame KEYDOWN events carry no `repeat` attribute, so
+            # getattr with a default keeps held-key repeats from double-firing
+            # without raising AttributeError.
+            is_repeat = bool(getattr(event, "repeat", 0))
             if self.state == GameState.START:
                 if event.key in (pygame.K_SPACE, pygame.K_RETURN, pygame.K_UP):
                     self.start_run()
             elif self.state == GameState.PLAYING:
-                if self._is_jump_key(event.key) and not event.repeat:
+                if self._is_jump_key(event.key) and not is_repeat:
                     self.player.press_jump()
                 elif event.key == pygame.K_p:
                     self.paused = not self.paused
@@ -213,42 +218,16 @@ class Game:
         self.background.draw(self.surface)
         # World-space drawing with shake applied via a translated subsurface?
         # Cheaper: pass offset into entity draws manually.
+        # World-space entities share the screen-shake offset via draw params;
+        # simulation state is never mutated for rendering.
         for cell in self.cells:
-            # Temporarily shift by drawing at offset position.
-            cell_x, cell_y0 = cell.x, cell.y
-            cell.x += ox
-            cell.y += oy
-            cell.draw(self.surface)
-            cell.x, cell.y = cell_x, cell_y0
+            cell.draw(self.surface, ox, oy)
         for hazard in self.hazards:
-            if hazard.kind == "spike":
-                hx = hazard.x
-                hazard.x += ox
-                hazard.draw(self.surface)
-                hazard.x = hx
-            elif hazard.kind == "beam":
-                hx = hazard.x
-                hazard.x += ox
-                hazard.draw(self.surface)
-                hazard.x = hx
-            else:  # drone
-                hx, hy = hazard.x, hazard.y
-                hazard.x += ox
-                hazard.y += oy
-                hazard.draw(self.surface)
-                hazard.x, hazard.y = hx, hy
+            hazard.draw(self.surface, ox, oy)
 
-        # Player (shift blit target by rendering sprite at offset rect).
         if self.state != GameState.GAME_OVER:
-            # Draw player by temporarily nudging its position.
-            px, py = self.player.x, self.player.y
-            self.player.x += ox
-            self.player.y += oy
-            self.player.draw(self.surface, self.sprites)
-            self.player.x, self.player.y = px, py
-        else:
-            # Death frame: player hidden inside the particle explosion.
-            pass
+            self.player.draw(self.surface, self.sprites, ox, oy)
+        # Else (GAME_OVER): player stays hidden inside the crash explosion.
         self.particles.draw(self.surface, (ox, oy))
 
         # Track glow line on top of world.
@@ -264,7 +243,6 @@ class Game:
             fps=self.clock.get_fps(),
             state=self.state,
             paused=self.paused,
-            time=self.time,
         )
         if self.state == GameState.START:
             self.screens.draw_start(self.surface, self.time, self.hi_score)
@@ -285,8 +263,6 @@ class Game:
     def run(self) -> None:
         running = True
         # Seed an ambient cell drift on the start screen.
-        from entities.pickups import EnergyCell
-
         for i in range(4):
             self.cells.append(EnergyCell(300.0 + i * 140.0, config.GROUND_Y - 150.0))
         while running:

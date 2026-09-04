@@ -20,7 +20,7 @@ class Hazard:
     def rect(self) -> pygame.Rect:
         raise NotImplementedError
 
-    def draw(self, surface: pygame.Surface) -> None:
+    def draw(self, surface: pygame.Surface, ox: float = 0.0, oy: float = 0.0) -> None:
         raise NotImplementedError
 
     @property
@@ -48,11 +48,12 @@ class Spike(Hazard):
     def rect(self) -> pygame.Rect:
         return pygame.Rect(int(self.x), int(config.GROUND_Y - self.h), int(self.w), int(self.h))
 
-    def draw(self, surface: pygame.Surface) -> None:
-        base_y = config.GROUND_Y
+    def draw(self, surface: pygame.Surface, ox: float = 0.0, oy: float = 0.0) -> None:
+        x0 = self.x + ox
+        base_y = config.GROUND_Y + oy
         glow = 0.6 + 0.4 * math.sin(self._pulse * 6.0)
         for i in range(self.count):
-            sx = self.x + i * 42.0
+            sx = x0 + i * 42.0
             pts = [(sx, base_y), (sx + 17, base_y - self.h), (sx + 34, base_y)]
             # Halo layer then hot core.
             neon.glow_polygon(surface, pts, config.NEON_MAGENTA, alpha=int(70 + 40 * glow))
@@ -60,7 +61,7 @@ class Spike(Hazard):
             pygame.draw.polygon(surface, config.NEON_MAGENTA, pts, 2)
             pygame.draw.line(surface, config.WHITE, (sx + 17, base_y - self.h), (sx + 17, base_y - 8), 2)
         # Warning strip on the track.
-        neon.h_line(surface, self.x - 6, self.x + self.w + 6, base_y + 4, config.NEON_MAGENTA, 2)
+        neon.h_line(surface, x0 - 6, x0 + self.w + 6, base_y + 4, config.NEON_MAGENTA, 2)
 
 
 class Beam(Hazard):
@@ -85,13 +86,14 @@ class Beam(Hazard):
     def rect(self) -> pygame.Rect:
         return pygame.Rect(int(self.x), int(self.top), int(self.w), int(self.bottom - self.top))
 
-    def draw(self, surface: pygame.Surface) -> None:
-        r = self.rect
+    def draw(self, surface: pygame.Surface, ox: float = 0.0, oy: float = 0.0) -> None:
+        r = self.rect.move(int(ox), int(oy))
+        top = self.top + oy
         # Gantry posts.
         post_c = (90, 40, 130)
-        pygame.draw.rect(surface, post_c, (r.x - 6, self.top - 90, 8, r.bottom - (self.top - 90)))
-        pygame.draw.rect(surface, post_c, (r.right - 2, self.top - 90, 8, r.bottom - (self.top - 90)))
-        pygame.draw.rect(surface, (40, 18, 60), (r.x - 6, self.top - 96, r.width + 20, 12))
+        pygame.draw.rect(surface, post_c, (r.x - 6, top - 90, 8, r.bottom - (top - 90)))
+        pygame.draw.rect(surface, post_c, (r.right - 2, top - 90, 8, r.bottom - (top - 90)))
+        pygame.draw.rect(surface, (40, 18, 60), (r.x - 6, top - 96, r.width + 20, 12))
         flicker = 0.5 + 0.5 * math.sin(self._pulse * 14.0)
         core = (
             int(255),
@@ -105,14 +107,13 @@ class Beam(Hazard):
             pygame.draw.line(surface, core, (r.x + 2, yy), (r.right - 2, yy), 3)
         pygame.draw.rect(surface, config.NEON_MAGENTA, r, 2)
         # "SLIDE" chevron hint on the track.
-        cy = config.GROUND_Y - 14
+        cy = config.GROUND_Y - 14 + oy
         for k in range(2):
             xx = r.centerx - 14 + k * 14
             pygame.draw.lines(
                 surface, config.NEON_CYAN, False,
                 [(xx, cy - 8), (xx + 8, cy), (xx, cy + 8)], 2,
             )
-            _ = flicker
 
 
 class Drone(Hazard):
@@ -146,15 +147,15 @@ class Drone(Hazard):
     def rect(self) -> pygame.Rect:
         return pygame.Rect(int(self.x), int(self.y), int(self.w), int(self.h))
 
-    def draw(self, surface: pygame.Surface) -> None:
-        r = self.rect
+    def draw(self, surface: pygame.Surface, ox: float = 0.0, oy: float = 0.0) -> None:
+        r = self.rect.move(int(ox), int(oy))
         cx, cy = r.centerx, r.centery
         # Rotor blur.
         rotor = int(10 + 6 * math.sin(self.t * 30.0))
         pygame.draw.ellipse(surface, (120, 240, 255),
                             (cx - rotor - 12, r.y - 10, (rotor + 12) * 2, 8), 1)
         # Patrol beam to the track (telegraphs position).
-        neon.v_line(surface, cx, r.bottom, config.GROUND_Y, config.NEON_ORANGE, 1, alpha=90)
+        neon.v_line(surface, cx, r.bottom, config.GROUND_Y + oy, config.NEON_ORANGE, 1, alpha=90)
         # Hull.
         neon.glow_rect(surface, r.inflate(6, 6), config.NEON_ORANGE, alpha=70)
         pygame.draw.rect(surface, (45, 22, 8), r, border_radius=8)

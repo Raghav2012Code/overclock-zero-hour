@@ -8,8 +8,13 @@ Run with either::
 
 from __future__ import annotations
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def main() -> int:
+    logging.basicConfig(level=logging.WARNING)
     import pygame
 
     import config
@@ -18,8 +23,8 @@ def main() -> int:
     pygame.init()
     try:
         pygame.mixer.init()
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("mixer init failed, continuing silent: %s", exc)
     pygame.display.set_caption(f"{config.TITLE} v{config.VERSION}")
     surface = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
     try:

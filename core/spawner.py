@@ -13,6 +13,7 @@ import random
 
 import config
 from entities.hazards import Beam, Drone, Spike
+from entities.pickups import EnergyCell
 
 
 class Spawner:
@@ -63,12 +64,8 @@ class Spawner:
         """Advance distance clock; spawn due patterns into ``world``.
 
         ``world`` is duck-typed (the :class:`Game`) exposing
-        ``hazards``, ``cells`` and ``difficulty``-independent helpers.
-        Imported lazily to avoid a hard core->entities import cycle at
-        module load; entities never import the spawner back.
+        ``hazards`` and ``cells``.
         """
-        from entities.pickups import EnergyCell
-
         self.distance_since_spawn += speed * dt
         if self.distance_since_spawn < self.next_gap:
             return

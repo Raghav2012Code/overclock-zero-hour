@@ -8,9 +8,12 @@ module, so there is no numpy dependency. If the mixer cannot be opened
 from __future__ import annotations
 
 import array
+import logging
 import math
 
 import config
+
+logger = logging.getLogger(__name__)
 
 
 def _tone(
@@ -77,11 +80,12 @@ class SoundBank:
             for s in (self.jump, self.slide, self.pickup, self.crash, self.ui):
                 try:
                     s.set_volume(config.MASTER_VOLUME)
-                except Exception:
-                    pass
+                except Exception as exc:  # pragma: no cover - defensive
+                    logger.debug("could not set SFX volume: %s", exc)
             self.enabled = True
-        except Exception:
+        except Exception as exc:
             # Headless / no audio device: stay silent, game still runs.
+            logger.warning("audio unavailable, running silent: %s", exc)
             self.enabled = False
 
     # -- convenience wrappers -------------------------------------------

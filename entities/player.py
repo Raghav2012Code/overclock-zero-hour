@@ -9,9 +9,15 @@ Features:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pygame
 
 import config
+
+if TYPE_CHECKING:
+    from core.audio import SoundBank
+    from entities.particles import ParticleSystem
 
 
 class Player:
@@ -21,7 +27,6 @@ class Player:
         self.vy = 0.0
         self.grounded = True
         self.sliding = False
-        self.slide_timer = 0.0
         self.coyote = 0.0
         self.jump_buffer = 0.0
         self.jump_held = False
@@ -47,7 +52,6 @@ class Player:
         """Current hitbox rect (bottom-aligned so slides hug the track)."""
         h = self.height
         w = self.width
-        bottom = self.y + config.PLAYER_H if self.grounded and self.sliding else self.y + h
         # When standing/jumping, top-left y is authoritative.
         if not (self.grounded and self.sliding):
             return pygame.Rect(int(self.x), int(self.y), int(w), int(h))
@@ -71,13 +75,8 @@ class Player:
         if not self.grounded and self.vy < 0.0:
             self.vy *= config.JUMP_CUT_MULTIPLIER
 
-    def set_slide(self, held: bool) -> None:
-        self.sliding = held
-        if held:
-            self.slide_timer += 0  # timer handled in update
-
     # -- physics ---------------------------------------------------------------
-    def _try_consume_jump(self, particles) -> bool:
+    def _try_consume_jump(self, particles: ParticleSystem) -> bool:
         if self.jump_buffer > 0.0 and (self.grounded or self.coyote > 0.0):
             self.vy = config.JUMP_VELOCITY
             self.grounded = False
@@ -88,7 +87,8 @@ class Player:
             return True
         return False
 
-    def update(self, dt: float, particles, slide_held: bool = False, sound=None) -> None:
+    def update(self, dt: float, particles: ParticleSystem,
+               slide_held: bool = False, sound: SoundBank | None = None) -> None:
         if self.dead:
             return
         was_grounded = self.grounded
@@ -146,8 +146,9 @@ class Player:
                 )
 
     # -- draw -------------------------------------------------------------------
-    def draw(self, surface: pygame.Surface, sprites: dict) -> None:
-        r = self.rect
+    def draw(self, surface: pygame.Surface, sprites: dict[str, pygame.Surface],
+             ox: float = 0.0, oy: float = 0.0) -> None:
+        r = self.rect.move(int(ox), int(oy))
         if self.sliding:
             img = sprites["player_slide"]
         elif not self.grounded:

@@ -37,7 +37,7 @@ class HUD:
 
     def draw(self, surface: pygame.Surface, *, score: int, hi_score: int,
              speed: float, cells: int, fps: float, state: GameState,
-             paused: bool, time: float) -> None:
+             paused: bool) -> None:
         # Top-left telemetry panel.
         panel = pygame.Rect(10, 10, 250, 84)
         self._panel(surface, panel)
@@ -73,6 +73,7 @@ class HUD:
         # CRT overlays always on top (but below full-screen menus).
         surface.blit(self.scanlines, (0, 0))
 
-    def f_small_render(self, surface, text, pos, color) -> None:
+    def f_small_render(self, surface: pygame.Surface, text: str,
+                         pos: tuple[float, float], color: tuple[int, int, int]) -> None:
         img = self.f_small.render(text, True, color)
         surface.blit(img, pos)
