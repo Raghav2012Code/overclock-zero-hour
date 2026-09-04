@@ -27,6 +27,9 @@ Headless suite, stdlib only (33 tests, <1s):
 python -m unittest discover -s tests -t .
 ```
 
+Run from the repo root (imports are root-relative). The `-t .` is
+required because `tests/` is a package.
+
 Covers jump/coyote/buffer/slide physics, frame-rate independence,
 collision forgiveness, hazard lethality, spawner bounds and variety,
 state transitions, input handling, hi-score persistence, and render
@@ -40,7 +43,8 @@ Python 3.11–3.13 for every push and PR.
 | SPACE / UP / W | Jump (release early = short hop) |
 | DOWN / S | Slide — cuts hitbox; dive-falls while airborne |
 | P | Pause |
-| R / SPACE | Reboot after flatline |
+| SPACE / ENTER / UP | Start from menu |
+| R / SPACE / ENTER | Reboot after flatline |
 | M | Back to menu after flatline |
 | ESC | Quit |
 
@@ -75,6 +79,8 @@ core/            # game loop, state machine, spawner, collision, audio synth
 entities/        # player, hazards, pickups, particles
 graphics/        # parallax background, neon fx, procedural sprite factory
 ui/              # telemetry HUD, start / game-over / pause screens
+tests/           # headless unittest suite (+ support.py helpers)
+AGENTS.md        # contributor notes for AI coding agents
 ```
 
 ## Tuning
