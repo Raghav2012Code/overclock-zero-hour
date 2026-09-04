@@ -114,11 +114,9 @@ class Player:
         self.vy += g * dt
         self.y += self.vy * dt
 
-        floor_y = config.GROUND_Y - (config.PLAYER_SLIDE_H if self.sliding and self.grounded else config.PLAYER_H)
-        # In-air slide uses the standing height for landing math.
-        land_line = config.GROUND_Y - config.PLAYER_H
-        if self.y >= land_line:
-            self.y = land_line
+        floor_land_line = config.GROUND_Y - config.PLAYER_H
+        if self.y >= floor_land_line:
+            self.y = floor_land_line
             if not was_grounded and self.vy > 500.0:
                 particles.land_dust(self.x + config.PLAYER_W / 2, config.GROUND_Y)
             self.vy = 0.0
@@ -146,7 +144,6 @@ class Player:
                     self.x + 4, config.GROUND_Y - 6,
                     config.NEON_MAGENTA if self.sliding else config.NEON_CYAN,
                 )
-        _ = floor_y  # (kept explicit for readability of landing math)
 
     # -- draw -------------------------------------------------------------------
     def draw(self, surface: pygame.Surface, sprites: dict) -> None:

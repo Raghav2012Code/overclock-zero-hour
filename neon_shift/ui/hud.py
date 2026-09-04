@@ -58,7 +58,9 @@ class HUD:
         frac = (speed - config.BASE_SPEED) / max(1.0, config.MAX_SPEED - config.BASE_SPEED)
         bx, by, bw = config.WIDTH - 190, 58, 170
         pygame.draw.rect(surface, (30, 30, 60), (bx, by, bw, 10))
-        pygame.draw.rect(surface, config.NEON_MAGENTA, (bx, by, int(bw * max(0.0, min(1.0, frac)))), 10)
+        fill_w = int(bw * max(0.0, min(1.0, frac)))
+        if fill_w > 0:
+            pygame.draw.rect(surface, config.NEON_MAGENTA, (bx, by, fill_w, 10))
         pygame.draw.rect(surface, config.WHITE, (bx, by, bw, 10), 1)
         self.f_small_render(surface, f"{fps:4.0f} FPS", (bx, 72), config.DIM)
 

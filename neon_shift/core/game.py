@@ -240,14 +240,11 @@ class Game:
 
         # Player (shift blit target by rendering sprite at offset rect).
         if self.state != GameState.GAME_OVER:
-            import pygame as _pg
-
-            tmp = self.surface
             # Draw player by temporarily nudging its position.
             px, py = self.player.x, self.player.y
             self.player.x += ox
             self.player.y += oy
-            self.player.draw(tmp, self.sprites)
+            self.player.draw(self.surface, self.sprites)
             self.player.x, self.player.y = px, py
         else:
             # Death frame: player hidden inside the particle explosion.

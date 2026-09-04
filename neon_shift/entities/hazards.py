@@ -89,8 +89,8 @@ class Beam(Hazard):
         r = self.rect
         # Gantry posts.
         post_c = (90, 40, 130)
-        pygame.draw.rect(surface, post_c, (r.x - 6, self.top - 90, 8, (r.bottom - (self.top - 90)))))
-        pygame.draw.rect(surface, post_c, (r.right - 2, self.top - 90, 8, (r.bottom - (self.top - 90)))))
+        pygame.draw.rect(surface, post_c, (r.x - 6, self.top - 90, 8, r.bottom - (self.top - 90)))
+        pygame.draw.rect(surface, post_c, (r.right - 2, self.top - 90, 8, r.bottom - (self.top - 90)))
         pygame.draw.rect(surface, (40, 18, 60), (r.x - 6, self.top - 96, r.width + 20, 12))
         flicker = 0.5 + 0.5 * math.sin(self._pulse * 14.0)
         core = (
