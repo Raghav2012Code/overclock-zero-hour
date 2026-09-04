@@ -6,8 +6,8 @@ import math
 
 import pygame
 
-from neon_shift import config
-from neon_shift.graphics import neon
+import config
+from graphics import neon
 
 
 def _font(size: int, bold: bool = False) -> pygame.font.Font:

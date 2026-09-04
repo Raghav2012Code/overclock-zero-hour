@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pygame
 
-from neon_shift import config
-from neon_shift.core.state import GameState
-from neon_shift.graphics import neon
+import config
+from core.state import GameState
+from graphics import neon
 
 
 def _font(size: int, bold: bool = False) -> pygame.font.Font:

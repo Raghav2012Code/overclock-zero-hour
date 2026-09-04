@@ -7,7 +7,7 @@ import random
 
 import pygame
 
-from neon_shift import config
+import config
 
 
 class Particle:

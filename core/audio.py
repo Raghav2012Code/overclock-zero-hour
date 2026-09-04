@@ -10,7 +10,7 @@ from __future__ import annotations
 import array
 import math
 
-from neon_shift import config
+import config
 
 
 def _tone(

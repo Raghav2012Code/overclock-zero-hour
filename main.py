@@ -2,28 +2,18 @@
 
 Run with either::
 
-    python -m neon_shift.main
+    python main.py
     python run.py
 """
 
 from __future__ import annotations
 
-import os
-import sys
-
-
-def _ensure_cwd_on_path() -> None:
-    cwd = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if cwd not in sys.path:
-        sys.path.insert(0, cwd)
-
 
 def main() -> int:
-    _ensure_cwd_on_path()
     import pygame
 
-    from neon_shift import config
-    from neon_shift.core.game import Game
+    import config
+    from core.game import Game
 
     pygame.init()
     try:

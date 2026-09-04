@@ -7,19 +7,19 @@ import random
 
 import pygame
 
-from neon_shift import config
-from neon_shift.core.audio import SoundBank
-from neon_shift.core.collision import collides
-from neon_shift.core.spawner import Spawner
-from neon_shift.core.state import GameState
-from neon_shift.entities.particles import ParticleSystem
-from neon_shift.entities.player import Player
-from neon_shift.graphics.background import ParallaxBackground
-from neon_shift.graphics.sprites import build_sprites
-from neon_shift.ui.hud import HUD
-from neon_shift.ui.screens import Screens
+import config
+from core.audio import SoundBank
+from core.collision import collides
+from core.spawner import Spawner
+from core.state import GameState
+from entities.particles import ParticleSystem
+from entities.player import Player
+from graphics.background import ParallaxBackground
+from graphics.sprites import build_sprites
+from ui.hud import HUD
+from ui.screens import Screens
 
-HI_SCORE_FILE = "neon_shift_hiscore.txt"
+HI_SCORE_FILE = "overclock_hiscore.txt"
 
 
 def load_hi_score() -> int:
@@ -285,7 +285,7 @@ class Game:
     def run(self) -> None:
         running = True
         # Seed an ambient cell drift on the start screen.
-        from neon_shift.entities.pickups import EnergyCell
+        from entities.pickups import EnergyCell
 
         for i in range(4):
             self.cells.append(EnergyCell(300.0 + i * 140.0, config.GROUND_Y - 150.0))

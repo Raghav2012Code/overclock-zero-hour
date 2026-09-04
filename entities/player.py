@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pygame
 
-from neon_shift import config
+import config
 
 
 class Player:

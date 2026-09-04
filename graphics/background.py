@@ -17,8 +17,8 @@ import random
 
 import pygame
 
-from neon_shift import config
-from neon_shift.graphics import neon
+import config
+from graphics import neon
 
 
 class _BuildingStrip:

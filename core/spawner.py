@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import random
 
-from neon_shift import config
-from neon_shift.entities.hazards import Beam, Drone, Spike
+import config
+from entities.hazards import Beam, Drone, Spike
 
 
 class Spawner:
@@ -67,7 +67,7 @@ class Spawner:
         Imported lazily to avoid a hard core->entities import cycle at
         module load; entities never import the spawner back.
         """
-        from neon_shift.entities.pickups import EnergyCell
+        from entities.pickups import EnergyCell
 
         self.distance_since_spawn += speed * dt
         if self.distance_since_spawn < self.next_gap:
