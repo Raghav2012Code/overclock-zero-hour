@@ -19,6 +19,20 @@ python main.py
 python run.py
 ```
 
+## Testing
+
+Headless suite, stdlib only (33 tests, <1s):
+
+```bash
+python -m unittest discover -s tests -t .
+```
+
+Covers jump/coyote/buffer/slide physics, frame-rate independence,
+collision forgiveness, hazard lethality, spawner bounds and variety,
+state transitions, input handling, hi-score persistence, and render
+purity. CI (`.github/workflows/ci.yml`) runs compile + tests on
+Python 3.11–3.13 for every push and PR.
+
 ## Controls
 
 | Input | Action |

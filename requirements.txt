@@ -1,1 +1,3 @@
-pygame-ce>=2.5.0
+# Tested with pygame-ce 2.5.8 on Python 3.14. Floor is pinned so fresh
+# installs never silently pull an older, incompatible build.
+pygame-ce>=2.5.8
